@@ -39,18 +39,20 @@ class FrenchTorrentDB:
         }
 
         # Evaluate the challenge data to send back for login
-        ctxt = PyV8.JSContext()
-        ctxt.enter()
+        with PyV8.JSLocker():
+            ctxt = PyV8.JSContext()
+            ctxt.enter()
 
-        ctxt.eval("var hash = '"+ data['hash'] +"';")
-        ctxt.eval("var challenge = '';")
-        ctxt.eval("var a = '05f';")
-
-        for ch in data['challenge']:
-            ctxt.eval("challenge += "+ ch +";")
-
-        postData['secure_login'] = ctxt.eval("challenge;");
-
+            ctxt.eval("var hash = '"+ data['hash'] +"';")
+            ctxt.eval("var challenge = '';")
+            ctxt.eval("var a = '05f';")
+    
+            for ch in data['challenge']:
+                ctxt.eval("challenge += "+ ch +";")
+    
+            postData['secure_login'] = ctxt.eval("challenge;");
+            ctxt.leave()
+            
         # Login headers
         headers = {
             'Referer': 'http://www.frenchtorrentdb.com/?section=LOGIN',
